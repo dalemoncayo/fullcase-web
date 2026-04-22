@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/components/shared/auth-provider';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -17,6 +18,8 @@ export default function Home() {
       }
     }
   }, [user, loading, router]);
+
+  if (loading) return <Skeleton className="h-screen w-full" />;
 
   return null;
 }

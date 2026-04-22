@@ -3,7 +3,7 @@
 import { LogOut, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/components/shared/auth-provider';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { auth } from '@/lib/firebase/config';
+import { logOut, useAuth } from '@/hooks/use-auth';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -22,15 +22,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const handleSignOut = async () => {
-    await auth.signOut();
-    router.replace('/login');
+    try {
+      await logOut();
+      router.replace('/login');
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Sign out error:', error);
+      }
+      toast.error('Failed to sign out. Please try again.');
+    }
   };
 
-  const navLinks = [
-    { name: 'Projects', href: '/projects' },
-    // More links can be added here
-  ];
-
+  const navLinks = [{ name: 'Projects', href: '/projects' }];
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Sidebar */}
