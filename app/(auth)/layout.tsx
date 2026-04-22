@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 import { useAuth } from '@/components/shared/auth-provider';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -14,8 +15,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     }
   }, [loading, user, router]);
 
-  if (loading || user) {
-    return null;
+  if (loading) {
+    return <Skeleton className="h-screen w-full" />;
+  }
+  if (user) {
+    return null; // redirect pending
   }
 
   return <>{children}</>;

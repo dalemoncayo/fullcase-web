@@ -14,6 +14,7 @@ export async function createUserDocument(
     {
       ...data,
       id: uid,
+      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     },
     { merge: true },

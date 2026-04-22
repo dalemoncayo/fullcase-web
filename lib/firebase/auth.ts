@@ -23,7 +23,12 @@ export async function signInWithGoogle() {
       photoURL: credential.user.photoURL || null,
     });
   } catch (error) {
-    console.error('Failed to upsert user document for Google sign in:', error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(
+        'Failed to upsert user document for Google sign in:',
+        error,
+      );
+    }
     // Non-blocking: we swallow the error so auth isn't blocked.
   }
   return credential;

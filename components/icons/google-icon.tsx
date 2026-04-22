@@ -1,3 +1,4 @@
+// Lucide React does not currently ship a Google icon, so this custom SVG is used.
 export function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
