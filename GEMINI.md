@@ -1,8 +1,6 @@
-@AGENTS.md
+# Gemini — Fullcase Web
 
-# Claude — Fullcase Web
-
-This file contains Claude-specific instructions for `fullcase-web`. The canonical architecture, data models, folder structure, and coding standards live in `AGENTS.md`. Read that file fully before writing any code.
+This file contains Gemini-specific instructions for `fullcase-web`. The canonical architecture, data models, folder structure, and coding standards live in `AGENTS.md`. Read that file fully before writing any code.
 
 ---
 
@@ -266,12 +264,13 @@ try {
 
 ---
 
-## 10. Claude-Specific Behavior
+## 10. Gemini-Specific Behavior
 
-- **Edit over create**: prefer modifying existing files unless the file clearly does not yet exist.
-- **No comments for obvious code**: only add a comment when the *why* is non-obvious (a constraint, a workaround, a hidden invariant).
-- **No stub implementations**: if a full implementation isn't possible, say so clearly rather than generating a placeholder.
-- **No trailing summaries**: do not narrate what you just did at the end of a response — the diff speaks for itself.
-- **Types before UI**: always write or verify the TypeScript type definition before writing the component that consumes it.
-- **Read before edit**: read a file before editing it; never guess at existing content.
+- **Read `AGENTS.md` first**: treat it as a pre-prompt, not optional context. Do not generate code that contradicts any section of `AGENTS.md`.
+- **No new collection paths**: only use collection and document paths defined in `AGENTS.md` Section 3. Do not invent new top-level collections or subcollections.
+- **No new field names**: do not add fields to Firestore documents beyond those defined in the data model. If new fields are needed, acknowledge this and propose the addition before writing code.
+- **Complete implementations only**: do not return partial code with `// TODO` or `// implement this`. If a full implementation is not possible in one response, split it into clearly labeled pieces with explicit continuation instructions.
 - **shadcn install note**: if a needed shadcn component is not installed, output the install command (`npx shadcn@latest add <component>`) and ask before proceeding.
+- **Types before UI**: always confirm the TypeScript type definition exists in `types/` before writing the component or hook that depends on it.
+- **Explicit imports**: always include full import statements in generated code. Do not rely on auto-import assumptions.
+- **`'use client'` directive**: every component file that uses React hooks, browser APIs, or Firebase client SDK must have `'use client'` as its first line.
