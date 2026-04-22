@@ -27,7 +27,7 @@ jobs:
       - name: Run Claude Auto Review
         uses: anthropics/claude-code-action@beta
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY_KM }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           direct_prompt: "/review-pr ${{ github.repository }} ${{ github.event.pull_request.number || github.event.issue.number }}"
           model: "claude-sonnet-4-6"
