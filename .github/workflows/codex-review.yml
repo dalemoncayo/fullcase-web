@@ -1,8 +1,6 @@
 name: codex-auto-review
 
 on:
-  pull_request:
-    types: [opened, reopened, ready_for_review]
   issue_comment:
     types: [created]
 
@@ -10,8 +8,9 @@ jobs:
   # Job 1: Run Codex review in sandbox (no network access)
   codex:
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@codex-review'))
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@codex-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read

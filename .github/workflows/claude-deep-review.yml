@@ -1,16 +1,15 @@
-name: pr-auto-review-agent
+name: Claude Deep Review
 
 on:
-  pull_request:
-    types: [opened, reopened, ready_for_review]
   issue_comment:
     types: [created]
 
 jobs:
-  auto-review:
+  deep-review:
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude-review'))
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude-deep-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,12 +23,12 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Run Claude Auto Review
+      - name: Run Claude Deep Review
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          direct_prompt: "/review-pr ${{ github.repository }} ${{ github.event.pull_request.number || github.event.issue.number }}"
+          direct_prompt: "/review-pr ${{ github.repository }} ${{ github.event.issue.number }}"
           model: "claude-sonnet-4-6"
           allowed_tools: "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),mcp__github_inline_comment__create_inline_comment"
           timeout_minutes: 10
