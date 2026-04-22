@@ -1,4 +1,8 @@
+'use client';
+
 import { FolderCode } from 'lucide-react';
+import { useState } from 'react';
+import { CreateProjectDialog } from '@/components/projects/project-dialog';
 import {
   Empty,
   EmptyContent,
@@ -10,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 
 export default function ProjectsPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="flex h-full items-center justify-center">
       <Empty>
@@ -24,10 +30,12 @@ export default function ProjectsPage() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row justify-center gap-2">
-          <Button>Create Project</Button>
+          <Button onClick={() => setIsDialogOpen(true)}>Create Project</Button>
           <Button variant="outline">Import Project</Button>
         </EmptyContent>
       </Empty>
+
+      <CreateProjectDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   );
 }
