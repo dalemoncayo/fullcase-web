@@ -58,8 +58,8 @@ jobs:
 
   # Job 2: Post the review comment to the PR (runs outside sandbox with GITHUB_TOKEN)
   post-review:
-    needs: codex
-    if: needs.codex.outputs.review != ''
+    needs: codex-review
+    if: needs.codex-review.outputs.review != ''
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -68,7 +68,7 @@ jobs:
       - name: Post review comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REVIEW_BODY: ${{ needs.codex.outputs.review }}
+          REVIEW_BODY: ${{ needs.codex-review.outputs.review }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.issue.number }}
           gh pr comment "$PR_NUMBER" \
