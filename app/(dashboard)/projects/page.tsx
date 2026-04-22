@@ -1,7 +1,4 @@
-'use client';
-
-import { ArrowUpRightIcon, FolderCode } from 'lucide-react';
-import Link from 'next/link';
+import { FolderCode } from 'lucide-react';
 import {
   Empty,
   EmptyContent,
@@ -30,16 +27,6 @@ export default function ProjectsPage() {
           <Button>Create Project</Button>
           <Button variant="outline">Import Project</Button>
         </EmptyContent>
-        <Button
-          variant="link"
-          asChild
-          className="text-muted-foreground mt-4"
-          size="sm"
-        >
-          <Link href="/docs">
-            Learn More <ArrowUpRightIcon />
-          </Link>
-        </Button>
       </Empty>
     </div>
   );

@@ -3,6 +3,7 @@
 import { LogOut, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React from 'react';
 import { useAuth } from '@/components/shared/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -39,26 +40,56 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Generate breadcrumbs from pathname
   const segments = pathname.split('/').filter(Boolean);
 
+  const getBreadcrumbLabel = (segment: string) => {
+    const labels: Record<string, string> = {
+      projects: 'Projects',
+      modules: 'Modules',
+      'test-runs': 'Test Runs',
+      settings: 'Settings',
+      profile: 'Profile',
+    };
+    return labels[segment] || segment.replace(/-/g, ' ');
+  };
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between bg-background px-6">
+      <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between border-b bg-background px-6">
         <div className="flex items-center gap-4">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/projects">Projects</Link>
+                  <Link href="/projects">Home</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {segments.length > 1 && <BreadcrumbSeparator />}
-              {segments.length > 1 && (
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="capitalize">
-                    {segments[segments.length - 1].replace(/-/g, ' ')}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              )}
+              {segments.map((segment, index) => {
+                const href = `/${segments.slice(0, index + 1).join('/')}`;
+                const isLast = index === segments.length - 1;
+                const label = getBreadcrumbLabel(segment);
+
+                // Skip "projects" if it's the first segment since we have "Home"
+                if (index === 0 && segment === 'projects') return null;
+
+                return (
+                  <React.Fragment key={href}>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      {isLast ? (
+                        <BreadcrumbPage className="capitalize">
+                          {label}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link href={href} className="capitalize">
+                            {label}
+                          </Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                  </React.Fragment>
+                );
+              })}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
