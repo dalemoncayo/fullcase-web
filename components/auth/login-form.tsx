@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -47,7 +48,13 @@ export function LoginForm({
     try {
       await signInWithEmail(data.email, data.password);
       router.replace('/projects');
-    } catch {
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        if (err.code === 'auth/too-many-requests') {
+          toast.error('Too many attempts. Please try again later.');
+          return;
+        }
+      }
       toast.error('Invalid email or password. Please try again.');
     }
   };
@@ -56,7 +63,12 @@ export function LoginForm({
     try {
       await signInWithGoogle();
       router.replace('/projects');
-    } catch {
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        if (err.code === 'auth/popup-closed-by-user') {
+          return;
+        }
+      }
       toast.error('Google sign in failed. Please try again.');
     }
   };

@@ -53,7 +53,11 @@ export async function registerWithEmail(
       photoURL: null,
     });
   } catch (error) {
-    await credential.user.delete();
+    try {
+      await credential.user.delete();
+    } catch {
+      // cleanup failure — original error is re-thrown below
+    }
     throw error;
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -55,7 +56,17 @@ export function RegisterForm({
     try {
       await registerWithEmail(data.email, data.password, data.displayName);
       router.replace('/projects');
-    } catch {
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        if (err.code === 'auth/email-already-in-use') {
+          toast.error('An account with this email already exists.');
+          return;
+        }
+        if (err.code === 'auth/too-many-requests') {
+          toast.error('Too many attempts. Please try again later.');
+          return;
+        }
+      }
       toast.error('Registration failed. Please try again.');
     }
   };
