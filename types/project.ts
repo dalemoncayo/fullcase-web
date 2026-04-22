@@ -10,11 +10,3 @@ export interface Project {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
-
-export interface Member {
-  userId: string;
-  displayName: string;
-  email: string;
-  photoURL: string | null;
-  joinedAt: Timestamp;
-}

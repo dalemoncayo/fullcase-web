@@ -6,11 +6,16 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { generateToken } from '@/lib/utils';
-import type { Project, User } from '@/types';
+import type { Project } from '@/types';
 
 export async function createProject(
   data: Pick<Project, 'name' | 'description'>,
-  user: Pick<User, 'id' | 'displayName' | 'email' | 'photoURL'>,
+  user: {
+    id: string;
+    displayName: string | null;
+    email: string | null;
+    photoURL: string | null;
+  },
 ): Promise<string> {
   const batch = writeBatch(db);
 
@@ -33,8 +38,8 @@ export async function createProject(
   const memberRef = doc(db, 'projects', projectId, 'members', user.id);
   batch.set(memberRef, {
     userId: user.id,
-    displayName: user.displayName,
-    email: user.email,
+    displayName: user.displayName || 'Anonymous',
+    email: user.email || '',
     photoURL: user.photoURL,
     joinedAt: serverTimestamp(),
   });

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/use-auth';
-import { createProject } from '@/services/project-service';
+import { useProjects } from '@/hooks/use-projects';
 import { ProjectForm, ProjectFormValues } from './project-form';
 
 interface CreateProjectDialogProps {
@@ -22,6 +22,7 @@ export function CreateProjectDialog({
   onOpenChange,
 }: CreateProjectDialogProps) {
   const { user } = useAuth();
+  const { createProject } = useProjects();
 
   const handleSubmit = async (values: ProjectFormValues) => {
     if (!user) {
@@ -32,15 +33,17 @@ export function CreateProjectDialog({
     try {
       await createProject(values, {
         id: user.uid,
-        displayName: user.displayName || 'Anonymous',
-        email: user.email || '',
+        displayName: user.displayName,
+        email: user.email,
         photoURL: user.photoURL,
       });
 
       toast.success('Project created successfully');
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating project:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error creating project:', error);
+      }
       toast.error('Failed to create project. Please try again.');
     }
   };
