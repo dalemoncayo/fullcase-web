@@ -949,6 +949,84 @@ Remove all unused imports. `npm run lint:fix` removes them automatically.
 
 ---
 
+## 17. Code Review Guidelines
+
+This section tells AI reviewers (and humans) **how to review**. It is read by the Claude and Codex review subagents alongside `.agents/skills/code-review/SKILL.md`.
+
+### Severity Levels
+
+| Level | Priority | Icon | Definition |
+|---|---|---|---|
+| CRITICAL | P0 | 🔴 | Security vulnerability, data loss / leak risk, guaranteed production breakage |
+| HIGH | P1 | 🔴 | Mandatory rule violation, definite bug |
+| MEDIUM | P2 | 🟡 | Quality or performance improvement |
+| LOW | P3 | 🟢 | Minor suggestion (excluded from automated review) |
+
+### Gating Criteria
+
+Only flag an issue if ALL of the following are true:
+
+1. It meaningfully affects correctness, reliability, performance, security, or maintainability.
+2. It is discrete and actionable with a specific fix.
+3. It does not demand a level of rigor not present in the rest of the codebase.
+4. It was introduced in the diff (do not flag pre-existing issues).
+5. The original author would fix it if they knew about it.
+6. It is not already caught by ESLint, Prettier, or `tsc --noEmit`.
+
+**Principle: Prefer no finding over a weak finding.**
+
+### Do NOT Flag
+
+- Style nits caught by Prettier / ESLint (quotes, semicolons, indentation, import order, unused imports, `exhaustive-deps`, `max-len`).
+- `any` keyword alone — the deeper design issue might be worth flagging, but the keyword is already an ESLint/TS error.
+- Auto-generated / tool-managed files: `.next/`, `next-env.d.ts`, `components/ui/*` (shadcn CLI output), `*.tsbuildinfo`.
+- Naming preferences that already follow project conventions (kebab-case files, PascalCase components, camelCase hooks/services, SCREAMING_SNAKE_CASE env/constants).
+- Code outside the diff.
+- Missing test coverage alone (only flag if tied to a concrete bug risk).
+- Speculative risks without a concrete path.
+- Broad architectural opinions.
+
+### Review Perspectives
+
+Automated PR review runs these three subagents in parallel. Local manual review consolidates all three.
+
+1. **Code Quality** — Bugs / logic errors, design / architecture violations (layering, Firebase SDK in components, `firebase-admin` usage, Server Actions for Firestore), readability / maintainability, missing `loading` + `error` in hooks.
+2. **Performance** — Unnecessary `onSnapshot` where `getDocs` suffices, N+1 Firestore reads, unmounted subscriptions, re-render storms (inline objects/functions passed to memoized children), `<img>` instead of `next/image`, missing virtualization on unbounded lists.
+3. **Security** — Hardcoded secrets, PII in logs, `dangerouslySetInnerHTML` with raw user input, auth-guard bypasses, invite-token validation, storage path abuse, open redirects, `localStorage` for tokens Firebase already manages.
+
+For detailed criteria, see `.agents/skills/code-review/SKILL.md`.
+
+### Merge Readiness
+
+- CRITICAL / HIGH = 0 → ✅ Ready to merge
+- CRITICAL / HIGH ≥ 1 → ⚠️ Action required
+
+Automated review reports CRITICAL / HIGH / MEDIUM only. LOW findings are surfaced by local manual review.
+
+### Output Format
+
+Each finding must be written in English.
+
+```
+🔴 [CRITICAL] `path/to/file.tsx:42`
+Firebase SDK imported directly inside a React component. Project rule: components consume hooks; hooks call services; only services touch the Firebase SDK.
+Suggestion: Move the Firestore call into `services/<feature>-service.ts` and expose it via a hook under `hooks/`.
+```
+
+When there are no findings:
+
+```
+✅ No issues found
+```
+
+### Continuous Improvement
+
+When a review finding was wrong, run `/update-review-checklist` (Claude) or the `update-review-checklist` skill (Codex) to add it to `.agents/skills/code-review/references/bad-review.md` so the system never repeats the mistake.
+
+When a new convention is introduced, update either this file (project rules) or `.agents/skills/code-review/SKILL.md` (review checkpoints).
+
+---
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 

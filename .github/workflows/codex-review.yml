@@ -1,0 +1,77 @@
+name: codex-auto-review
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+jobs:
+  # Job 1: Run Codex review in sandbox (no network access)
+  codex:
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@codex-review'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    timeout-minutes: 10
+    outputs:
+      review: ${{ steps.codex-review.outputs.final-message }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR diff for Codex
+        id: pr-diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.issue.number }}
+          gh pr view "$PR_NUMBER" --json title,body,baseRefName,headRefName,additions,deletions > /tmp/pr-info.json
+          gh pr diff "$PR_NUMBER" > /tmp/pr-diff.txt
+
+      - name: Run Codex Auto Review
+        id: codex-review
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          codex-home: .codex
+          prompt: |
+            You are a PR reviewer.
+
+            The PR diff and metadata have been pre-fetched and saved to:
+            - /tmp/pr-info.json (PR title, body, base/head branches, additions/deletions)
+            - /tmp/pr-diff.txt (full unified diff)
+
+            Read those files first, then follow the review procedure in .codex/prompts/review-pr.md.
+            Skip Step 1 — the diff is already available in the files above.
+            In Step 3, spawn 3 subagents in parallel using the custom agents defined in .codex/agents/:
+            @quality-reviewer, @performance-reviewer, @security-reviewer.
+            Do NOT attempt to run gh commands or access the network.
+            Output ONLY the markdown summary comment as specified in review-pr.md Step 5 — nothing else.
+          sandbox: read-only
+          safety-strategy: drop-sudo
+          codex-args: '["--model", "gpt-5.3-codex"]'
+
+  # Job 2: Post the review comment to the PR (runs outside sandbox with GITHUB_TOKEN)
+  post-review:
+    needs: codex
+    if: needs.codex.outputs.review != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Post review comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEW_BODY: ${{ needs.codex.outputs.review }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.issue.number }}
+          gh pr comment "$PR_NUMBER" \
+            --repo "${{ github.repository }}" \
+            --body "$REVIEW_BODY"

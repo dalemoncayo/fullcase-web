@@ -1,0 +1,68 @@
+# Security rules for Codex CLI
+# Ported from .claude/settings.json allow/deny lists.
+# Codex applies the most restrictive decision when multiple rules match:
+#   forbidden > prompt > allow
+
+# --- Destructive operations: FORBIDDEN ---
+
+prefix_rule(pattern = ["rm"],       decision = "forbidden", justification = "File deletion is prohibited")
+prefix_rule(pattern = ["sudo"],     decision = "forbidden", justification = "Superuser access is prohibited")
+prefix_rule(pattern = ["chmod"],    decision = "forbidden", justification = "Permission changes are prohibited")
+prefix_rule(pattern = ["curl"],     decision = "forbidden", justification = "External HTTP requests are prohibited")
+prefix_rule(pattern = ["wget"],     decision = "forbidden", justification = "External HTTP requests are prohibited")
+prefix_rule(pattern = ["pkill"],    decision = "forbidden", justification = "Process killing is prohibited")
+prefix_rule(pattern = ["kill"],     decision = "forbidden", justification = "Process killing is prohibited")
+
+# --- Destructive Git operations: FORBIDDEN ---
+
+prefix_rule(pattern = ["git", "reset"],           decision = "forbidden", justification = "git reset is prohibited")
+prefix_rule(pattern = ["git", "rebase"],          decision = "forbidden", justification = "git rebase is prohibited")
+prefix_rule(pattern = ["git", "push", "--force"], decision = "forbidden", justification = "Force push is prohibited")
+prefix_rule(pattern = ["git", "push", "-f"],      decision = "forbidden", justification = "Force push is prohibited")
+prefix_rule(pattern = ["git", "clean"],           decision = "forbidden", justification = "git clean is prohibited")
+
+# --- Safe read/navigation commands: ALLOW ---
+
+prefix_rule(pattern = ["ls"],   decision = "allow")
+prefix_rule(pattern = ["tree"], decision = "allow")
+prefix_rule(pattern = ["cat"],  decision = "allow")
+prefix_rule(pattern = ["grep"], decision = "allow")
+prefix_rule(pattern = ["find"], decision = "allow")
+
+# --- Safe file operations: ALLOW ---
+
+prefix_rule(pattern = ["mkdir"], decision = "allow")
+prefix_rule(pattern = ["touch"], decision = "allow")
+prefix_rule(pattern = ["mv"],    decision = "allow")
+prefix_rule(pattern = ["cp"],    decision = "allow")
+
+# --- Safe Git operations: ALLOW ---
+
+prefix_rule(pattern = ["git", "status"], decision = "allow")
+prefix_rule(pattern = ["git", "log"],    decision = "allow")
+prefix_rule(pattern = ["git", "diff"],   decision = "allow")
+prefix_rule(pattern = ["git", "branch"], decision = "allow")
+prefix_rule(pattern = ["git", "show"],   decision = "allow")
+prefix_rule(pattern = ["git", "stash"],  decision = "allow")
+
+# --- GitHub CLI: ALLOW ---
+
+prefix_rule(pattern = ["gh", "pr", "diff"],    decision = "allow")
+prefix_rule(pattern = ["gh", "pr", "view"],    decision = "allow")
+prefix_rule(pattern = ["gh", "pr", "comment"], decision = "allow")
+
+# --- Node.js / npm / Next.js: ALLOW ---
+
+prefix_rule(pattern = ["npm", "install"], decision = "allow")
+prefix_rule(pattern = ["npm", "ci"],      decision = "allow")
+prefix_rule(pattern = ["npm", "run"],     decision = "allow")
+prefix_rule(pattern = ["npm", "exec"],    decision = "allow")
+prefix_rule(pattern = ["npm", "test"],    decision = "allow")
+prefix_rule(pattern = ["npm", "ls"],      decision = "allow")
+prefix_rule(pattern = ["npx"],            decision = "allow")
+prefix_rule(pattern = ["pnpm"],           decision = "allow")
+prefix_rule(pattern = ["yarn"],           decision = "allow")
+prefix_rule(pattern = ["next"],           decision = "allow")
+prefix_rule(pattern = ["tsc"],            decision = "allow")
+prefix_rule(pattern = ["eslint"],         decision = "allow")
+prefix_rule(pattern = ["prettier"],       decision = "allow")

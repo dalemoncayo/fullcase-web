@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Imperative summary, max 80 chars. Prefix with [P0]-[P3]."
+          },
+          "body": {
+            "type": "string",
+            "description": "Valid Markdown. Explain WHY it is a problem and WHAT happens if left unaddressed."
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "0.0-1.0. How confident the reviewer is that this is a real issue."
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3,
+            "description": "P0=drop everything, P1=urgent, P2=normal, P3=low"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["quality", "performance", "security"],
+            "description": "Which subagent perspective found this issue."
+          },
+          "code_location": {
+            "type": "object",
+            "properties": {
+              "absolute_file_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "line_range": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["absolute_file_path", "line_range"],
+            "additionalProperties": false
+          },
+          "suggestion": {
+            "type": "string",
+            "description": "Concrete, actionable fix proposal."
+          }
+        },
+        "required": ["title", "body", "confidence_score", "priority", "category", "code_location", "suggestion"],
+        "additionalProperties": false
+      }
+    },
+    "overall_correctness": {
+      "type": "boolean",
+      "description": "true if patch is free of bugs and blocking issues."
+    },
+    "overall_explanation": {
+      "type": "string",
+      "description": "Concise justification for the correctness verdict."
+    },
+    "overall_confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "required": ["findings", "overall_correctness", "overall_explanation", "overall_confidence_score"],
+  "additionalProperties": false
+}

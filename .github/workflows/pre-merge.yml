@@ -1,0 +1,41 @@
+name: Pre Merge
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pre-merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Lint, type-check, build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (report-only)
+        run: npm run lint:check
+
+      - name: Build (includes tsc --noEmit)
+        env:
+          # Placeholder values so `next build` doesn't fail on missing env
+          # Real values are injected at deploy time — never commit real keys.
+          NEXT_PUBLIC_FIREBASE_API_KEY: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_APP_ID: ci-placeholder
+        run: npm run build

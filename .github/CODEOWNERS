@@ -1,0 +1,19 @@
+# CODEOWNERS - Automatically assign reviewers when a PR is created
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Syntax: <pattern> <owner1> <owner2> ...
+# Later rules take precedence, so the default rule should be listed first.
+
+# Default owners for the entire repository
+# TODO: Replace with the actual GitHub handles for the fullcase-web team.
+*   @dale-fst
+
+# High-sensitivity areas — require explicit review
+/lib/firebase/                @dale-fst
+/services/                    @dale-fst
+/app/(auth)/                  @dale-fst
+/app/invite/                  @dale-fst
+/app/(dashboard)/layout.tsx   @dale-fst
+/types/                       @dale-fst
+/.github/                     @dale-fst
+/next.config.ts               @dale-fst
