@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -15,15 +16,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { registerWithEmail } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
 
-const schema = z.object({
-  displayName: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+const schema = z
+  .object({
+    displayName: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -32,12 +38,14 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter();
+  const { registerWithEmail } = useAuth();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       displayName: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   });
 
@@ -94,6 +102,19 @@ export function RegisterForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField<FormValues>
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
                   <Input type="password" {...field} />
                 </FormControl>

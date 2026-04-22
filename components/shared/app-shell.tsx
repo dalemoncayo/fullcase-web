@@ -14,16 +14,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { logOut, useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
-      await logOut();
+      await signOut();
       router.replace('/login');
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
@@ -49,11 +50,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary',
                   pathname.startsWith(link.href)
                     ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
-                }`}
+                    : 'text-muted-foreground',
+                )}
               >
                 {link.name}
               </Link>
@@ -65,9 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex flex-col flex-1">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 justify-between">
-          <div className="w-full flex-1">
-            {/* Mobile menu toggle could go here */}
-          </div>
+          <div className="w-full flex-1"></div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">

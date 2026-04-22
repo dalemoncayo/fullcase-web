@@ -1,4 +1,4 @@
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { User } from '@/types';
 
@@ -7,24 +7,15 @@ export async function createUserDocument(
   data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<void> {
   const userRef = doc(db, 'users', uid);
-  const snap = await getDoc(userRef);
 
-  if (snap.exists()) {
-    await setDoc(
-      userRef,
-      {
-        displayName: data.displayName,
-        photoURL: data.photoURL,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
-  } else {
-    await setDoc(userRef, {
+  // setDoc with merge: true creates the doc if it doesn't exist, and updates if it does.
+  await setDoc(
+    userRef,
+    {
       ...data,
       id: uid,
-      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    });
-  }
+    },
+    { merge: true },
+  );
 }

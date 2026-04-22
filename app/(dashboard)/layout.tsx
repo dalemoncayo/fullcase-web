@@ -17,11 +17,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [loading, user, router]);
 
   if (loading || !user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center p-8">
-        <Skeleton className="h-full w-full rounded-xl" />
-      </div>
-    );
+    return <Skeleton className="h-screen w-full" />;
   }
 
   return <AppShell>{children}</AppShell>;

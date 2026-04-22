@@ -16,11 +16,16 @@ export async function signInWithEmail(email: string, password: string) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   const credential = await signInWithPopup(auth, provider);
-  await createUserDocument(credential.user.uid, {
-    email: credential.user.email || '',
-    displayName: credential.user.displayName || 'User',
-    photoURL: credential.user.photoURL || null,
-  });
+  try {
+    await createUserDocument(credential.user.uid, {
+      email: credential.user.email || '',
+      displayName: credential.user.displayName || 'User',
+      photoURL: credential.user.photoURL || null,
+    });
+  } catch (error) {
+    console.error('Failed to upsert user document for Google sign in:', error);
+    // Non-blocking: we swallow the error so auth isn't blocked.
+  }
   return credential;
 }
 
@@ -34,13 +39,18 @@ export async function registerWithEmail(
     email,
     password,
   );
-  await updateProfile(credential.user, { displayName });
+  try {
+    await updateProfile(credential.user, { displayName });
 
-  await createUserDocument(credential.user.uid, {
-    email,
-    displayName,
-    photoURL: null,
-  });
+    await createUserDocument(credential.user.uid, {
+      email,
+      displayName,
+      photoURL: null,
+    });
+  } catch (error) {
+    await credential.user.delete();
+    throw error;
+  }
 
   return credential;
 }
