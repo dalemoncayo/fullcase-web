@@ -1,8 +1,7 @@
 'use client';
 
-import { IconFolderCode } from '@tabler/icons-react';
-import { ArrowUpRightIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowUpRightIcon, FolderCode } from 'lucide-react';
+import Link from 'next/link';
 import {
   Empty,
   EmptyContent,
@@ -10,15 +9,16 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/ui/empty';
+} from '@/components/shared/empty-state';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectsPage() {
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <IconFolderCode />
+            <FolderCode />
           </EmptyMedia>
           <EmptyTitle>No Projects Yet</EmptyTitle>
           <EmptyDescription>
@@ -36,9 +36,9 @@ export default function ProjectsPage() {
           className="text-muted-foreground mt-4"
           size="sm"
         >
-          <a href="#">
+          <Link href="/docs">
             Learn More <ArrowUpRightIcon />
-          </a>
+          </Link>
         </Button>
       </Empty>
     </div>
