@@ -28,5 +28,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: "@claude-review"
           model: "claude-sonnet-4-6"
           timeout_minutes: 10
