@@ -5,15 +5,14 @@
 # Later rules take precedence, so the default rule should be listed first.
 
 # Default owners for the entire repository
-# TODO: Replace with the actual GitHub handles for the fullcase-web team.
-*   @dale-fst
+*   @dale-fst @dalemoncayo
 
 # High-sensitivity areas — require explicit review
-/lib/firebase/                @dale-fst
-/services/                    @dale-fst
-/app/(auth)/                  @dale-fst
-/app/invite/                  @dale-fst
-/app/(dashboard)/layout.tsx   @dale-fst
-/types/                       @dale-fst
-/.github/                     @dale-fst
-/next.config.ts               @dale-fst
+/lib/firebase/                @dale-fst @dalemoncayo
+/services/                    @dale-fst @dalemoncayo
+/app/(auth)/                  @dale-fst @dalemoncayo
+/app/invite/                  @dale-fst @dalemoncayo
+/app/(dashboard)/layout.tsx   @dale-fst @dalemoncayo
+/types/                       @dale-fst @dalemoncayo
+/.github/                     @dale-fst @dalemoncayo
+/next.config.ts               @dale-fst @dalemoncayo
