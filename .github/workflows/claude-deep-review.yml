@@ -5,11 +5,11 @@ on:
     types: [created]
 
 jobs:
-  deep-review:
+  claude-deep-review:
     if: |
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '@deep-review')
+      contains(github.event.comment.body, '@claude-deep-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read

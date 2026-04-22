@@ -6,7 +6,7 @@ on:
 
 jobs:
   # Job 1: Run Codex review in sandbox (no network access)
-  codex:
+  codex-review:
     if: |
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
