@@ -5,7 +5,7 @@ import {
   registerWithEmail as authRegisterWithEmail,
   signInWithEmail as authSignInWithEmail,
   signInWithGoogle as authSignInWithGoogle,
-} from '@/lib/firebase/auth';
+} from '@/services/auth-service';
 
 export function useAuth() {
   const context = useAuthContext();

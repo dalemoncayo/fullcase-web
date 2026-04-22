@@ -55,8 +55,12 @@ export function RegisterForm({
     try {
       await registerWithEmail(data.email, data.password, data.displayName);
       router.replace('/projects');
-    } catch {
-      toast.error('Registration failed. Please try again.');
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Registration failed. Please try again.';
+      toast.error(message);
     }
   };
 

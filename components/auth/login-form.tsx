@@ -47,8 +47,12 @@ export function LoginForm({
     try {
       await signInWithEmail(data.email, data.password);
       router.replace('/projects');
-    } catch {
-      toast.error('Invalid email or password. Please try again.');
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Invalid email or password. Please try again.';
+      toast.error(message);
     }
   };
 
@@ -56,8 +60,13 @@ export function LoginForm({
     try {
       await signInWithGoogle();
       router.replace('/projects');
-    } catch {
-      toast.error('Google sign in failed. Please try again.');
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Google sign in failed. Please try again.';
+      if (message === 'Sign in was cancelled.') return;
+      toast.error(message);
     }
   };
 

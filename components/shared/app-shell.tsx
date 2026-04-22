@@ -2,104 +2,170 @@
 
 import { LogOut, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
+import React from 'react';
+import { useAuth } from '@/components/shared/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/use-auth';
-import { cn } from '@/lib/utils';
+import { logOut } from '@/services/auth-service';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      router.replace('/login');
+      await logOut();
     } catch (error) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('Sign out error:', error);
-      }
-      toast.error('Failed to sign out. Please try again.');
+      console.error('Failed to sign out:', error);
     }
   };
 
-  const navLinks = [{ name: 'Projects', href: '/projects' }];
-  return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full border-r bg-muted/40 md:w-64 flex-shrink-0 flex flex-col">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="">Fullcase Web</span>
-          </Link>
-        </div>
-        <div className="flex-1 overflow-auto py-2">
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary',
-                  pathname.startsWith(link.href)
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground',
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </aside>
+  // Generate breadcrumbs from pathname
+  const segments = pathname.split('/').filter(Boolean);
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 justify-between">
-          <div className="w-full flex-1"></div>
+  const getBreadcrumbLabel = (segment: string) => {
+    const labels: Record<string, string> = {
+      projects: 'Projects',
+      modules: 'Modules',
+      'test-runs': 'Test Runs',
+      settings: 'Settings',
+      profile: 'Profile',
+    };
+    return labels[segment] || segment.replace(/-/g, ' ');
+  };
+
+  return (
+    <div className="flex h-screen flex-col overflow-hidden">
+      {/* Header */}
+      <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between border-b bg-background px-6">
+        <div className="flex items-center gap-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/projects">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {segments.map((segment, index) => {
+                const href = `/${segments.slice(0, index + 1).join('/')}`;
+                const isLast = index === segments.length - 1;
+                const label = getBreadcrumbLabel(segment);
+
+                // Skip "projects" if it's the first segment since we have "Home"
+                if (index === 0 && segment === 'projects') return null;
+
+                return (
+                  <React.Fragment key={href}>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      {isLast ? (
+                        <BreadcrumbPage className="capitalize">
+                          {label}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link href={href} className="capitalize">
+                            {label}
+                          </Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                  </React.Fragment>
+                );
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
+        <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.photoURL || ''} alt="User avatar" />
+              <button className="flex items-center gap-3 rounded-lg p-1 outline-none">
+                <div className="hidden flex-col items-end text-sm leading-tight sm:flex">
+                  <span className="truncate font-medium">
+                    {user?.displayName}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user?.email}
+                  </span>
+                </div>
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage
+                    src={user?.photoURL || ''}
+                    alt={user?.displayName || ''}
+                  />
                   <AvatarFallback>
-                    {user?.displayName?.[0] ||
-                      user?.email?.[0]?.toUpperCase() || (
-                        <UserIcon className="h-4 w-4" />
-                      )}
+                    {user?.displayName?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" sideOffset={8}>
+              <DropdownMenuLabel className="p-0 font-normal sm:hidden">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={user?.photoURL || ''}
+                      alt={user?.displayName || ''}
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      {user?.displayName?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
+                      {user?.displayName}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="sm:hidden" />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/profile"
+                    className="flex w-full cursor-pointer items-center"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Account
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleSignOut}
-                className="text-red-600 focus:text-red-600 cursor-pointer"
+                className="cursor-pointer"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <LogOut className="h-4 w-4" />
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </header>
-        <main className="flex-1 p-4 lg:p-6 overflow-auto bg-background">
-          {children}
-        </main>
-      </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-auto bg-background">{children}</main>
     </div>
   );
 }
