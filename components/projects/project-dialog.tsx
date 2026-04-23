@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/use-auth';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjectActions } from '@/hooks/use-projects';
 import { ProjectForm, ProjectFormValues } from './project-form';
 
 interface CreateProjectDialogProps {
@@ -22,7 +22,7 @@ export function CreateProjectDialog({
   onOpenChange,
 }: CreateProjectDialogProps) {
   const { user } = useAuth();
-  const { createProject } = useProjects();
+  const { createProject } = useProjectActions();
 
   const handleSubmit = async (values: ProjectFormValues) => {
     if (!user) {
