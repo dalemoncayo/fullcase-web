@@ -7,7 +7,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
 import {
   createProject as createProjectService,
@@ -23,9 +23,11 @@ export function useProjects() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!user) {
-      setProjects([]);
-      setLoading(false);
+    if (!user?.uid) {
+      if (!user) {
+        setProjects([]);
+        setLoading(false);
+      }
       return;
     }
 
@@ -54,31 +56,49 @@ export function useProjects() {
     );
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.uid, user]);
 
-  const createProject = async (
-    data: Pick<Project, 'name' | 'description'>,
-    userData: {
-      id: string;
-      displayName: string | null;
-      email: string | null;
-      photoURL: string | null;
-    },
-  ) => {
-    try {
-      setError(null);
-      const projectId = await createProjectService(data, userData);
-      return projectId;
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error('Failed to create project');
-      setError(error);
-      throw error;
-    }
+  return {
+    projects,
+    loading,
+    error,
   };
+}
 
-  const deleteProject = async (projectId: string) => {
+export function useProjectActions() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createProject = useCallback(
+    async (
+      data: Pick<Project, 'name' | 'description'>,
+      userData: {
+        id: string;
+        displayName: string | null;
+        email: string | null;
+        photoURL: string | null;
+      },
+    ) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const projectId = await createProjectService(data, userData);
+        return projectId;
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error('Failed to create project');
+        setError(error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  const deleteProject = useCallback(async (projectId: string) => {
     try {
+      setLoading(true);
       setError(null);
       await deleteProjectService(projectId);
     } catch (err) {
@@ -86,11 +106,12 @@ export function useProjects() {
         err instanceof Error ? err : new Error('Failed to delete project');
       setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   return {
-    projects,
     createProject,
     deleteProject,
     loading,

@@ -2,7 +2,7 @@
 
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjectActions } from '@/hooks/use-projects';
 
 interface DeleteProjectDialogProps {
   projectId: string;
@@ -17,7 +17,7 @@ export function DeleteProjectDialog({
   open,
   onOpenChange,
 }: DeleteProjectDialogProps) {
-  const { deleteProject } = useProjects();
+  const { deleteProject } = useProjectActions();
 
   const handleDelete = async () => {
     try {
