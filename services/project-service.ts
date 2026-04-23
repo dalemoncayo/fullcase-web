@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   serverTimestamp,
   writeBatch,
@@ -46,4 +47,7 @@ export async function createProject(
 
   await batch.commit();
   return projectId;
+}
+export async function deleteProject(projectId: string): Promise<void> {
+  await deleteDoc(doc(db, 'projects', projectId));
 }

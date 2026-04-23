@@ -9,7 +9,10 @@ import {
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
-import { createProject as createProjectService } from '@/services/project-service';
+import {
+  createProject as createProjectService,
+  deleteProject as deleteProjectService,
+} from '@/services/project-service';
 import type { Project } from '@/types';
 import { useAuth } from './use-auth';
 
@@ -74,9 +77,22 @@ export function useProjects() {
     }
   };
 
+  const deleteProject = async (projectId: string) => {
+    try {
+      setError(null);
+      await deleteProjectService(projectId);
+    } catch (err) {
+      const error =
+        err instanceof Error ? err : new Error('Failed to delete project');
+      setError(error);
+      throw error;
+    }
+  };
+
   return {
     projects,
     createProject,
+    deleteProject,
     loading,
     error,
   };
